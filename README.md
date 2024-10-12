@@ -1,2 +1,2 @@
-# Peek-Pop_onClick
+# Peek Pop onClick
 click to preview, double click to open as normal click.
