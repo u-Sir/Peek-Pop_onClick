@@ -1,0 +1,53 @@
+{
+    "extensionDescription": {
+        "message": "Click to preview, double click to open as normal click."
+    },
+    "enableContainerIdentify": {
+        "message": "Keep open in the same container as original page"
+    },
+    "closeWhenFocusedInitialWindow": {
+        "message": "Close popup when origin window is focused"
+    },
+    "closeByEsc": {
+        "message": "Esc to close the current popup page (overrides page's default Esc behavior)"
+    },
+    "doubleTapKeyToSendPageBack": {
+        "message": "Double tap on specific key to send page back to original window."
+    },
+    "noneKey": {
+        "message": "None"
+    },
+    "blurEffectSettings": {
+        "message": "Blur Effect Settings"
+    },
+    "blurEnable": {
+        "message": "Set blur effect on Original Window when popup"
+    },
+    "blurPx": {
+        "message": "Blur effect strengh: "
+    },
+    "blurTime": {
+        "message": "Blur in specific seconds (s): "
+    },
+    "popupSettings": {
+        "message": "Popup Window Settings"
+    },
+    "windowType": {
+        "message": "Popup window type:"
+    },
+    "normal": {
+        "message": "Normal"
+    },
+    "previewModeSettings": {
+        "message": "Click"
+    },
+    "previewModeDisabledUrls": {
+        "message": "Disable on all links on these pages, one rule per line, supports regular expressions, wildcards, and plain text."
+    },
+    "blacklistSettings": {
+        "message": "Blacklist"
+    },
+    "linkDisabledUrls": {
+        "message": "Disable pop-ups for the following URLs, one rule per line, supports regular expressions, wildcards, and plain text."
+    }
+}

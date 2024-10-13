@@ -1,0 +1,56 @@
+{
+    "manifest_version": 3,
+    "name": "Peek Pop onClick",
+    "description": "__MSG_extensionDescription__",
+    "version": "0.1.0",
+    "default_locale": "en",
+    "icons": {
+        "128": "resources/icon.svg"
+    },
+    "background": {
+        "scripts": [
+            "background.js"
+        ]
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "<all_urls>"
+            ],
+            "js": [
+                "content.js"
+            ],
+            "run_at": "document_start"
+        }
+    ],
+    "permissions": [
+        "storage",
+        "tabs",
+        "cookies"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "options_ui": {
+        "page": "resources/options/options.html",
+        "open_in_tab": true
+    },
+    "action": {
+        "default_icon": {
+            "128": "resources/icon.svg"
+        },
+        "default_popup": "resources/options/options.html",
+        "theme_icons": [
+            {
+                "light": "resources/icon-dark.svg",
+                "dark": "resources/icon.svg",
+                "size": 32
+            }
+        ]
+    },
+    "browser_specific_settings": {
+        "gecko": {
+            "id": "peek_pop_onClick@uxer"
+        }
+    }
+}

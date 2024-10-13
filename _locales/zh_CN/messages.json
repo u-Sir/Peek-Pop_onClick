@@ -1,0 +1,53 @@
+{
+    "extensionDescription": {
+        "message": "点击预览，双击触发普通点击。"
+    },
+    "enableContainerIdentify": {
+        "message": "确保弹窗跟原页面处于同一容器内"
+    },
+    "closeWhenFocusedInitialWindow": {
+        "message": "焦点回到原窗口时自动关闭弹窗"
+    },
+    "closeByEsc": {
+        "message": "Esc 关闭当前弹窗页面（覆盖 Esc 原有行为）"
+    },
+    "doubleTapKeyToSendPageBack": {
+        "message": "双击所选键时发送当前弹窗页面回原窗口"
+    },
+    "noneKey": {
+        "message": "无"
+    },
+    "blurEffectSettings": {
+        "message": "模糊效果"
+    },
+    "blurEnable": {
+        "message": "弹窗时背景模糊"
+    },
+    "blurPx": {
+        "message": "模糊程度："
+    },
+    "blurTime": {
+        "message": "模糊效果过渡时间（秒）："
+    },
+    "popupSettings": {
+        "message": "弹窗设置"
+    },
+    "windowType": {
+        "message": "弹出窗口类型："
+    },
+    "normal": {
+        "message": "普通"
+    },
+    "previewModeSettings": {
+        "message": "点击"
+    },
+    "previewModeDisabledUrls": {
+        "message": "对以下页面内的任何链接都不进行响应，每行一条规则，支持正则表达式、通配符、纯文本"
+    },
+    "blacklistSettings": {
+        "message": "黑名单"
+    },
+    "linkDisabledUrls": {
+        "message": "禁止弹出以下 URLs ，每行一条规则，支持正则表达式、通配符、纯文本"
+    }
+}
