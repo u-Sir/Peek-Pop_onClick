@@ -3,6 +3,13 @@
 </div>
 <h1 align="center">Peek Pop onClick</h1>
 
-<div align="center">click to preview, double click to open as normal click.
-
-
+# features
+- click to preview
+- double click to send normal click
+- doulbe tap `Ctrl(Default)` to send page back
+- `Esc` to close popup window (default)
+- `click` or `scroll` to auto remember popup windows size and position for each domains
+- support blur background
+- blacklist for links or pages
+- support incognito mode
+- support containers on Firefox
