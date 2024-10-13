@@ -156,7 +156,9 @@ function handleDoubleClick(e) {
     }
     chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 
-    isDoubleClick = false;
+    setTimeout(() => {
+        isDoubleClick = false;
+    }, 250);
 }
 
 function resetClickState() {
