@@ -3,6 +3,7 @@
 </div>
 <h1 align="center">Peek Pop onClick</h1>
 
+[![](https://img.shields.io/amo/v/peek-pop-onclick.svg?label=Firefox&logo=firefoxbrowser)](https://addons.mozilla.org/firefox/addon/peek-pop-onclick)
 # features
 - click to preview
 - double click to send normal click
