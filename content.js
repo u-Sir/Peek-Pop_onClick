@@ -86,11 +86,17 @@ function handleMouseDown(e) {
     focusAt = null;
     removeBlurOverlay();
 
-    const linkElement = e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a'));
-    const linkUrl = linkElement ? linkElement.href : null;
-    if (linkUrl && linkUrl.trim().startsWith('javascript:')) return;
-    if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
+    const linkElement = e.composedPath().find(node => node instanceof HTMLAnchorElement) ||
+        (e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a')));
 
+    const linkUrl = linkElement ?
+        (linkElement.getAttribute('data-url') ||
+            (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+        : null;
+
+
+    if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
+    if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
     if (!(isUrlDisabled(window.location.href, previewModeDisabledUrls))) {
         previewMode = true;
@@ -129,9 +135,16 @@ function handleDoubleClick(e) {
     // Prevent the single-click action from triggering
     clearTimeout(clickTimeout);
 
-    const linkElement = e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a'));
-    const linkUrl = linkElement ? linkElement.href : null;
-    if (linkUrl && linkUrl.trim().startsWith('javascript:')) return;
+
+    const linkElement = e.composedPath().find(node => node instanceof HTMLAnchorElement) ||
+        (e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a')));
+
+    const linkUrl = linkElement ?
+        (linkElement.getAttribute('data-url') ||
+            (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+        : null;
+
+    if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
     if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
     e.preventDefault(); // Prevent the default double-click action
@@ -156,6 +169,7 @@ function handleDoubleClick(e) {
     }
     chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 
+
     setTimeout(() => {
         isDoubleClick = false;
     }, 250);
@@ -172,9 +186,16 @@ function handleEvent(e) {
 
     if (e.type === 'click') {
         document.addEventListener('dblclick', handleDoubleClick, true);
-        const linkElement = e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a'));
-        const linkUrl = linkElement ? linkElement.href : null;
-        if (linkUrl && linkUrl.trim().startsWith('javascript:')) return;
+
+        const linkElement = e.composedPath().find(node => node instanceof HTMLAnchorElement) ||
+            (e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a')));
+
+        const linkUrl = linkElement ?
+            (linkElement.getAttribute('data-url') ||
+                (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+            : null;
+
+        if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
         if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
         if (previewMode && linkUrl && !isDoubleClick) {
@@ -182,8 +203,7 @@ function handleEvent(e) {
             e.stopPropagation();
 
             clickTimeout = setTimeout(() => {
-                handlePreviewMode(e);
-
+                handlePreviewMode(e, linkUrl);
             }, 250);
         }
 
@@ -209,16 +229,12 @@ function handleEvent(e) {
     chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 }
 
-function handlePreviewMode(e) {
+function handlePreviewMode(e, linkUrl) {
 
     if (!isMouseDown || hasPopupTriggered || isDoubleClick) return;
 
-    const linkElement = e.target instanceof HTMLElement && (e.target.tagName === 'A' ? e.target : e.target.closest('a'));
-    const linkUrl = linkElement ? linkElement.href : null;
-
-    if (linkUrl && linkUrl.trim().startsWith('javascript:')) return;
-
     if (linkUrl) {
+
         e.preventDefault();
         e.stopPropagation();
 
@@ -391,7 +407,7 @@ window.addEventListener('focus', async () => {
 
         chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
         if (closeWhenFocusedInitialWindow) {
-            chrome.runtime.sendMessage( { action: 'windowRegainedFocus' });
+            chrome.runtime.sendMessage({ action: 'windowRegainedFocus' });
         }
     } catch (error) {
         // console.error('Error loading user configs:', error);
