@@ -567,6 +567,7 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
     if (!popupWindowsInfo[originWindowId]) {
         popupWindowsInfo[originWindowId] = {};
     }
+    const domain = new URL(linkUrl).hostname;
     popupWindowsInfo[originWindowId][newWindow.id] = {
         windowType: newWindow.type,
         top: newWindow.top,
@@ -591,7 +592,6 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
     // Handle domain-specific saving
     if (rememberPopupSizeAndPositionForDomain) {
         try {
-            const domain = new URL(linkUrl).hostname;
             if (!popupWindowsInfo.savedPositionAndSize) {
                 popupWindowsInfo.savedPositionAndSize = {};
             }
