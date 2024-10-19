@@ -573,7 +573,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
         left: newWindow.left,
         width: newWindow.width,
         height: newWindow.height,
-        focused: newWindow.focused
+        focused: newWindow.focused,
+        originDomain: domain
     };
 
     if (rememberPopupSizeAndPosition) {
@@ -604,8 +605,7 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
                 top: newWindow.top,
                 left: newWindow.left,
                 width: newWindow.width,
-                height: newWindow.height,
-                originDomain: domain
+                height: newWindow.height
             };
         } catch (error) {
             console.error('Invalid URL for domain extraction:', error);
