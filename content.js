@@ -97,6 +97,7 @@ function handleMouseDown(e) {
 
     if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
     if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
+    if (e.altKey || e.shiftKey || e.ctrlKey || e.metaKey) return;
 
     if (!(isUrlDisabled(window.location.href, previewModeDisabledUrls))) {
         previewMode = true;
