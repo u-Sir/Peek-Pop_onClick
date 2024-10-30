@@ -155,7 +155,15 @@ function handleDoubleClick(e) {
     if (linkUrl) {
         hasPopupTriggered = true;
         isDoubleClick = true;
-        linkElement.click();
+        if (e.target.shadowRoot) {
+            linkElement.click();
+        } else {
+            try {
+                e.target.click(); // Attempt to call click on e.target
+            } catch (error) {
+                e.target.closest('a').click();
+            }
+        }
     } else {
         resetClickState();
     }
