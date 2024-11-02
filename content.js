@@ -450,7 +450,7 @@ function addClickMask() {
         width: 100vw;
         height: 100vh;
         background: rgba(0, 0, 0, 0); /* Semi-transparent mask */
-        z-index: 9999;
+        z-index: 2147483647;
         cursor: not-allowed;
         pointer-events: all; /* Ensure the mask captures all events */
       }
