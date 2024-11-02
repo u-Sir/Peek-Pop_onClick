@@ -57,23 +57,25 @@ async function handleKeyDown(e) {
                 chrome.runtime.sendMessage({ action: 'closeCurrentTab' });
             } else return;
         } catch (error) { }
-    } else {
-        try {
-            if (doubleTapKeyToSendPageBack === 'None') return;
+    }
+}
 
-            const keyMap = { 'Ctrl': e.ctrlKey, 'Alt': e.altKey, 'Shift': e.shiftKey, 'Meta': e.metaKey };
+async function handleKeyUp(e) {
+        try {
             const key = e.key;
+            if (doubleTapKeyToSendPageBack === 'None' || key !== doubleTapKeyToSendPageBack) return;
+
             const currentTime = new Date().getTime();
             const timeDifference = currentTime - lastKeyTime;
-            if (keyMap[doubleTapKeyToSendPageBack] && key === lastKey && timeDifference < 300) {
+
+            if (key === lastKey && timeDifference < 300) {
                 chrome.runtime.sendMessage({ action: 'sendPageBack' });
             } else {
                 lastKeyTime = currentTime;
                 lastKey = key;
             }
-        } catch (error) { }
-
-    }
+        } catch (error) {
+        }
 }
 
 
@@ -340,6 +342,7 @@ async function checkUrlAndToggleListeners() {
         events.forEach(event => document.addEventListener(event, handleEvent, true));
         document.addEventListener('mousedown', handleMouseDown);
         document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keyup', handleKeyUp);
         document.addEventListener('scrollend', savePositionSize);
     } else {
         previewMode = false;
@@ -347,6 +350,7 @@ async function checkUrlAndToggleListeners() {
         events.forEach(event => document.removeEventListener(event, handleEvent, true));
         document.removeEventListener('mousedown', handleMouseDown);
         document.removeEventListener('keydown', handleKeyDown);
+        document.removeEventListener('keyup', handleKeyUp);
         document.removeEventListener('scrollend', savePositionSize);
     }
 
@@ -405,6 +409,7 @@ window.addEventListener('focus', async () => {
     isDoubleClick = false;
     removeBlurOverlay();
     document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
 
     try {
         // In popup.js or content.js
