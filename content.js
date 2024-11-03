@@ -146,7 +146,8 @@ function handleDoubleClick(e) {
         (linkElement.getAttribute('data-url') ||
             (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
         : null;
-
+    
+    if (!linkUrl) return;
     if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
     if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
