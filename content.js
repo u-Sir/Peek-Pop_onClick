@@ -255,6 +255,11 @@ function handlePreviewMode(e, linkUrl) {
         }
         addClickMask();
 
+        if (window.self !== window.top) {
+            // Inside the iframe content script
+            window.parent.postMessage({ action: 'blurParent' }, '*');
+        }
+
         chrome.runtime.sendMessage({
             linkUrl: linkUrl,
             lastClientX: e.screenX,
@@ -353,6 +358,18 @@ async function checkUrlAndToggleListeners() {
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
         document.removeEventListener('scrollend', savePositionSize);
+    }
+
+    if (!(window.self !== window.top)) {
+        // Inside the parent page content script
+        window.addEventListener('message', function (e) {
+            if (e.data && e.data.action === 'blurParent') {
+                if (blurEnable) {
+                    addBlurOverlay(blurPx, blurTime);
+                }
+                addClickMask();
+            }
+        });
     }
 
 
