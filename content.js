@@ -62,7 +62,7 @@ async function handleKeyDown(e) {
 
 async function handleKeyUp(e) {
         try {
-            const key = e.key;
+            const key = e.key === 'Control' ? 'Ctrl' : e.key;
             if (doubleTapKeyToSendPageBack === 'None' || key !== doubleTapKeyToSendPageBack) return;
 
             const currentTime = new Date().getTime();
