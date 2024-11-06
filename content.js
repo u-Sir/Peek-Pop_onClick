@@ -368,6 +368,8 @@ async function checkUrlAndToggleListeners() {
                     addBlurOverlay(blurPx, blurTime);
                 }
                 addClickMask();
+            } else if (e.data && e.data.action === 'focusParent') {
+                window.focus();
             }
         });
     }
@@ -428,6 +430,10 @@ window.addEventListener('focus', async () => {
     removeBlurOverlay();
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
+    
+    if (window.self !== window.top) {
+        window.parent.postMessage({ action: 'focusParent' }, '*');
+    }
 
     try {
         // In popup.js or content.js
