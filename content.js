@@ -250,14 +250,14 @@ function handlePreviewMode(e, linkUrl) {
         e.preventDefault();
         e.stopPropagation();
 
-        if (blurEnable) {
-            addBlurOverlay(blurPx, blurTime);
-        }
-        addClickMask();
-
         if (window.self !== window.top) {
             // Inside the iframe content script
             window.parent.postMessage({ action: 'blurParent' }, '*');
+        } else {
+            if (blurEnable) {
+                addBlurOverlay(blurPx, blurTime);
+            }
+            addClickMask();
         }
 
         chrome.runtime.sendMessage({
@@ -370,6 +370,7 @@ async function checkUrlAndToggleListeners() {
                 addClickMask();
             } else if (e.data && e.data.action === 'focusParent') {
                 window.focus();
+                removeClickMask();
             }
         });
     }
