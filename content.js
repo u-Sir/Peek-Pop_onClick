@@ -93,7 +93,7 @@ function handleMouseDown(e) {
 
     const linkUrl = linkElement ?
         (linkElement.getAttribute('data-url') ||
-            (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+            (linkElement.href.startsWith('/') ? window.location.protocol + linkElement.href : linkElement.href))
         : null;
 
 
@@ -144,7 +144,7 @@ function handleDoubleClick(e) {
 
     const linkUrl = linkElement ?
         (linkElement.getAttribute('data-url') ||
-            (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+            (linkElement.href.startsWith('/') ? window.location.protocol + linkElement.href : linkElement.href))
         : null;
     
     if (!linkUrl) return;
@@ -204,7 +204,7 @@ function handleEvent(e) {
 
         const linkUrl = linkElement ?
             (linkElement.getAttribute('data-url') ||
-                (linkElement.href.startsWith('//') ? window.location.protocol + linkElement.href : linkElement.href))
+                (linkElement.href.startsWith('/') ? window.location.protocol + linkElement.href : linkElement.href))
             : null;
 
         if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
