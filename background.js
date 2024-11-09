@@ -223,35 +223,46 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             if (request.action === 'windowRegainedFocus') {
                 chrome.storage.local.get(['popupWindowsInfo'], (result) => {
-                    const popupWindowsInfo = result.popupWindowsInfo;
-                    const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).some(windowId => {
-                        return parseInt(windowId) === currentWindow.id;
-                    });
+                    const popupWindowsInfo = result.popupWindowsInfo || {};
+                    
+                    const isCurrentWindowOriginal = popupWindowsInfo.hasOwnProperty(currentWindow.id);
+            
                     if (isCurrentWindowOriginal) {
-
-                        let popupsToRemove = Object.keys(popupWindowsInfo[currentWindow.id] || {});
-
-
+                        // Initialize popupsToRemove with the current window's popups
+                        let popupsToRemove = new Set(Object.keys(popupWindowsInfo[currentWindow.id] || {}));
+            
+                        // Recursive function to find all nested sub-popups
+                        const addNestedPopups = (popupId) => {
+                            const subPopups = popupWindowsInfo[popupId];
+                            if (subPopups) {
+                                Object.keys(subPopups).forEach(subPopupId => {
+                                    if (!popupsToRemove.has(subPopupId)) {
+                                        popupsToRemove.add(subPopupId);
+                                        addNestedPopups(subPopupId); // Recurse into further nested sub-popups
+                                    }
+                                });
+                            }
+                        };
+            
+                        // Add all nested popups for each popup initially in popupsToRemove
+                        Array.from(popupsToRemove).forEach(popupId => addNestedPopups(popupId));
+            
                         chrome.windows.getAll({ populate: true }, windows => {
                             windows.forEach(window => {
-                                if (popupsToRemove.includes(window.id.toString())) {
+                                if (popupsToRemove.has(window.id.toString())) {
                                     chrome.windows.remove(window.id, () => {
                                         if (chrome.runtime.lastError) {
-                                            // console.error("Error removing window: ", chrome.runtime.lastError.message);
+                                            // Error handling for window removal
                                         } else {
-                                            // console.log("Window removed successfully.");
+                                            // Window removed successfully
                                         }
                                     });
-
                                 }
                             });
-
                         });
                     }
-
                 });
                 sendResponse({ status: 'window focus handled' });
-
             }
 
             if (request.action === 'updateIcon') {
