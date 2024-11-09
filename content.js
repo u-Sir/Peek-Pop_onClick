@@ -375,8 +375,8 @@ async function checkUrlAndToggleListeners() {
                     addBlurOverlay(blurPx, blurTime);
                 }
                 addClickMask();
-            } else if (e.data && e.data.action === 'focusParent') {
-                window.focus();
+            } else if (e.data && e.data.action === 'removeParentBlur') {
+                removeBlurOverlay();
                 removeClickMask();
             }
         });
@@ -440,7 +440,7 @@ window.addEventListener('focus', async () => {
     document.addEventListener('keyup', handleKeyUp);
     
     if (window.self !== window.top) {
-        window.parent.postMessage({ action: 'focusParent' }, '*');
+        window.parent.postMessage({ action: 'removeParentBlur' }, '*');
     }
 
     try {
