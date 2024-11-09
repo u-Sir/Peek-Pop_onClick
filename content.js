@@ -27,7 +27,7 @@ const configs = {
     'blurTime': 1,
     'popupWindowsInfo': {},
     'closeByEsc': true,
-    'doubleTapKeyToSendPageBack': 'None',
+    'doubleTapKeyToSendPageBack': 'Ctrl',
     'previewModeDisabledUrls': [],
     'previewModeWindowType': 'popup',
     'previewModeEnable': true,
