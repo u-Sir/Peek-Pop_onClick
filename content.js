@@ -211,11 +211,8 @@ function handleEvent(e) {
         if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
         if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
-        if (linkElement && linkElement.getAttribute('role') !== 'button' && linkElement.hasAttribute('aria-expanded')) {
-            document.addEventListener('dblclick', handleDoubleClick, true);
-        } else {
-            return;
-        }
+        if (!linkElement || (linkElement.getAttribute('role') === 'button' && linkElement.hasAttribute('aria-expanded'))) return;
+        document.addEventListener('dblclick', handleDoubleClick, true);
 
         if (previewMode && linkUrl && !isDoubleClick) {
             e.preventDefault();
