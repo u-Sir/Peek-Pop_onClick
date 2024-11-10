@@ -150,7 +150,7 @@ function handleDoubleClick(e) {
     if (!linkUrl) return;
     if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
     if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
-    if (linkElement && linkElement.getAttribute('role') === 'button') return;
+    if (linkElement && linkElement.getAttribute('role') === 'button' && linkElement.hasAttribute('aria-expanded')) return;
 
     e.preventDefault(); // Prevent the default double-click action
     e.stopPropagation(); // Stop the event from bubbling up
@@ -211,7 +211,7 @@ function handleEvent(e) {
         if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
         if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
 
-        if (linkElement && linkElement.getAttribute('role') !== 'button') {
+        if (linkElement && linkElement.getAttribute('role') !== 'button' && linkElement.hasAttribute('aria-expanded')) {
             document.addEventListener('dblclick', handleDoubleClick, true);
         } else {
             return;
