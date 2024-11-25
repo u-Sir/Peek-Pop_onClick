@@ -106,7 +106,7 @@ function handleMouseDown(e) {
 
         // Add the event listener
         const events = ["click", "mouseup"];
-        events.forEach(event => document.addEventListener(event, handleEvent, true));
+        events.forEach(event => window.addEventListener(event, handleEvent, true));
 
         // In popup.js or content.js
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
@@ -357,7 +357,7 @@ async function checkUrlAndToggleListeners() {
     } else {
         previewMode = false;
         const events = ["click", "mouseup"];
-        events.forEach(event => document.removeEventListener(event, handleEvent, true));
+        events.forEach(event => window.removeEventListener(event, handleEvent, true));
         document.removeEventListener('mousedown', handleMouseDown);
         document.removeEventListener('keydown', handleKeyDown);
         document.removeEventListener('keyup', handleKeyUp);
