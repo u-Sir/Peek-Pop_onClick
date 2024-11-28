@@ -26,6 +26,7 @@ input[type="radio"],
 input[type="checkbox"] {
     margin-left: 0px;
     margin-right: 8px;
+    cursor: pointer;
 }
 
 input[type="range"] {
