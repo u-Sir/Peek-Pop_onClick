@@ -165,8 +165,15 @@ function handleDoubleClick(e) {
             try {
                 e.target.click(); // Attempt to call click on e.target
             } catch (error) {
-                e.target.closest('a').click();
-            }
+                try {
+                    const clickEvent = new MouseEvent('click', {
+                        bubbles: true, // Make sure the event bubbles
+                        cancelable: true // Make the event cancelable
+                    });
+                    e.target.dispatchEvent(clickEvent);
+                } catch (error) {
+                    e.target.closest('a').click();
+                }
         }
     } else {
         resetClickState();
