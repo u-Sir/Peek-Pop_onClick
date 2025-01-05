@@ -61,21 +61,21 @@ async function handleKeyDown(e) {
 }
 
 async function handleKeyUp(e) {
-        try {
-            const key = e.key === 'Control' ? 'Ctrl' : e.key;
-            if (doubleTapKeyToSendPageBack === 'None' || key !== doubleTapKeyToSendPageBack) return;
+    try {
+        const key = e.key === 'Control' ? 'Ctrl' : e.key;
+        if (doubleTapKeyToSendPageBack === 'None' || key !== doubleTapKeyToSendPageBack) return;
 
-            const currentTime = new Date().getTime();
-            const timeDifference = currentTime - lastKeyTime;
+        const currentTime = new Date().getTime();
+        const timeDifference = currentTime - lastKeyTime;
 
-            if (key === lastKey && timeDifference < 300) {
-                chrome.runtime.sendMessage({ action: 'sendPageBack' });
-            } else {
-                lastKeyTime = currentTime;
-                lastKey = key;
-            }
-        } catch (error) {
+        if (key === lastKey && timeDifference < 300) {
+            chrome.runtime.sendMessage({ action: 'sendPageBack' });
+        } else {
+            lastKeyTime = currentTime;
+            lastKey = key;
         }
+    } catch (error) {
+    }
 }
 
 
@@ -146,7 +146,7 @@ function handleDoubleClick(e) {
         (linkElement.getAttribute('data-url') ||
             (linkElement.href.startsWith('/') ? window.location.protocol + linkElement.href : linkElement.href))
         : null;
-    
+
     if (!linkUrl) return;
     if (linkUrl && /^(mailto|tel|javascript):/.test(linkUrl.trim())) return;
     if (isUrlDisabled(linkUrl, linkDisabledUrls)) return;
@@ -174,6 +174,7 @@ function handleDoubleClick(e) {
                 } catch (error) {
                     e.target.closest('a').click();
                 }
+            }
         }
     } else {
         resetClickState();
@@ -442,7 +443,7 @@ window.addEventListener('focus', async () => {
     removeBlurOverlay();
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
-    
+
     if (window.self !== window.top) {
         window.parent.postMessage({ action: 'removeParentBlur' }, '*');
     }
