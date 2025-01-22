@@ -222,7 +222,7 @@ function handleEvent(e) {
         if (!linkElement || (linkElement.getAttribute('role') === 'button' && linkElement.hasAttribute('aria-expanded'))) return;
         document.addEventListener('dblclick', handleDoubleClick, true);
 
-        if (previewMode && linkUrl && !isDoubleClick && e.pointerType) {
+        if (previewMode && linkUrl && !isDoubleClick && e.isTrusted) {
             e.preventDefault();
             e.stopPropagation();
 
