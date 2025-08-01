@@ -449,12 +449,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             return getZoomFactor().then(zoom => {
                 return Promise.all([
-                    saveConfig('lastClientX', request.lastClientX * zoom),
-                    saveConfig('lastClientY', request.lastClientY * zoom),
-                    saveConfig('lastScreenTop', request.top * zoom),
-                    saveConfig('lastScreenLeft', request.left * zoom),
-                    saveConfig('lastScreenWidth', request.width * zoom),
-                    saveConfig('lastScreenHeight', request.height * zoom)
+                    saveConfig('lastClientX', request.lastClientX * zoom * window.devicePixelRatio),
+                    saveConfig('lastClientY', request.lastClientY * zoom * window.devicePixelRatio),
+                    saveConfig('lastScreenTop', request.top * zoom * window.devicePixelRatio),
+                    saveConfig('lastScreenLeft', request.left * zoom * window.devicePixelRatio),
+                    saveConfig('lastScreenWidth', request.width * zoom * window.devicePixelRatio),
+                    saveConfig('lastScreenHeight', request.height * zoom * window.devicePixelRatio)
                 ]);
             }).then(() => {
                 return loadUserConfigs().then(userConfigs => {
