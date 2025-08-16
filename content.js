@@ -17,7 +17,6 @@ let linkDisabledUrls,
     blurTime,
     closeByEsc,
     doubleTapKeyToSendPageBack,
-    previewModeWindowType,
     previewModeBlacklist;
 
 const configs = {
@@ -279,10 +278,10 @@ function handlePreviewMode(e, linkUrl) {
             linkUrl: linkUrl,
             lastClientX: e.screenX,
             lastClientY: e.screenY,
-            width: window.screen.availWidth,
-            height: window.screen.availHeight,
-            top: window.screen.availTop,
-            left: window.screen.availLeft,
+            width: window.screen.availWidth * window.devicePixelRatio,
+            height: window.screen.availHeight * window.devicePixelRatio,
+            top: window.screen.availTop * window.devicePixelRatio,
+            left: window.screen.availLeft * window.devicePixelRatio,
             trigger: 'click'
         }, () => {
             hasPopupTriggered = true;

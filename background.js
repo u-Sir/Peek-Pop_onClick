@@ -133,8 +133,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         }
                                         popupWindowsInfo[originWindowId][currentWindow.id] = {
                                             windowType: currentWindow.type,
-                                            top: currentWindow.top,
-                                            left: currentWindow.left,
+                                            top: currentWindow.top * window.devicePixelRatio,
+                                            left: currentWindow.left * window.devicePixelRatio,
                                             width: currentWindow.width,
                                             height: currentWindow.height,
                                             originDomain: domain
@@ -151,15 +151,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
                                                 if (popupWindowsInfo.savedPositionAndSize) {
-                                                    popupWindowsInfo.savedPositionAndSize.left = currentWindow.left;
-                                                    popupWindowsInfo.savedPositionAndSize.top = currentWindow.top;
+                                                    popupWindowsInfo.savedPositionAndSize.left = currentWindow.left * window.devicePixelRatio;
+                                                    popupWindowsInfo.savedPositionAndSize.top = currentWindow.top * window.devicePixelRatio;
                                                     popupWindowsInfo.savedPositionAndSize.width = currentWindow.width;
                                                     popupWindowsInfo.savedPositionAndSize.height = currentWindow.height;
 
                                                 } else {
                                                     popupWindowsInfo.savedPositionAndSize = {
-                                                        top: currentWindow.top,
-                                                        left: currentWindow.left,
+                                                        top: currentWindow.top * window.devicePixelRatio,
+                                                        left: currentWindow.left * window.devicePixelRatio,
                                                         width: currentWindow.width,
                                                         height: currentWindow.height
                                                     };
@@ -172,8 +172,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                                 // Store the position and size under the domain
                                                 // Update or add the domain-specific position and size
                                                 popupWindowsInfo.savedPositionAndSize[domain] = {
-                                                    top: currentWindow.top,
-                                                    left: currentWindow.left,
+                                                    top: currentWindow.top * window.devicePixelRatio,
+                                                    left: currentWindow.left * window.devicePixelRatio,
                                                     width: currentWindow.width,
                                                     height: currentWindow.height
                                                 };
@@ -210,14 +210,14 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }
                         return acc;
                     }, {});
-                    const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).length === 0  || 
-                    (Object.keys(popupWindowsInfo).length === 1 && 'savedPositionAndSize' in popupWindowsInfo) || 
-                    Object.keys(popupWindowsInfo).some(windowId => {
-                        // Check if windowId exists and popupWindowsInfo[windowId] is empty (no popups)
-                        return windowId && 
-                               parseInt(windowId) === currentWindow.id && 
-                               Object.keys(popupWindowsInfo[windowId]).length === 0;
-                    });
+                    const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).length === 0 ||
+                        (Object.keys(popupWindowsInfo).length === 1 && 'savedPositionAndSize' in popupWindowsInfo) ||
+                        Object.keys(popupWindowsInfo).some(windowId => {
+                            // Check if windowId exists and popupWindowsInfo[windowId] is empty (no popups)
+                            return windowId &&
+                                parseInt(windowId) === currentWindow.id &&
+                                Object.keys(popupWindowsInfo[windowId]).length === 0;
+                        });
                     if (!isCurrentWindowOriginal) {
                         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                             if (tabs.length > 0) {
@@ -225,22 +225,22 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 chrome.tabs.remove(currentTab.id, () => {
                                     chrome.windows.getAll({ populate: false }, (windows) => {
                                         const existingWindowIds = windows.map(win => win.id); // List of all current window IDs
-                                    
+
                                         function cleanPopupInfo(info) {
                                             return Object.keys(info).reduce((acc, key) => {
                                                 const keyAsInt = parseInt(key, 10);
-                                    
+
                                                 // Check if key is a valid window ID and clean recursively
                                                 if (key === 'savedPositionAndSize' || existingWindowIds.includes(keyAsInt)) {
                                                     acc[key] = (key === 'savedPositionAndSize') ? info[key] : cleanPopupInfo(info[key]); // Recursive cleaning for nested popups
                                                 }
-                                    
+
                                                 return acc;
                                             }, {});
                                         }
-                                    
+
                                         const cleanedPopupWindowsInfo = cleanPopupInfo(result.popupWindowsInfo);
-                                    
+
                                         // Set the cleaned popupWindowsInfo back to storage
                                         chrome.storage.local.set({ popupWindowsInfo: cleanedPopupWindowsInfo });
                                     });
@@ -257,13 +257,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             if (request.action === 'windowRegainedFocus') {
                 chrome.storage.local.get(['popupWindowsInfo'], (result) => {
                     const popupWindowsInfo = result.popupWindowsInfo || {};
-                    
+
                     const isCurrentWindowOriginal = popupWindowsInfo.hasOwnProperty(currentWindow.id);
-            
+
                     if (isCurrentWindowOriginal) {
                         // Initialize popupsToRemove with the current window's popups
                         let popupsToRemove = new Set(Object.keys(popupWindowsInfo[currentWindow.id] || {}));
-            
+
                         // Recursive function to find all nested sub-popups
                         const addNestedPopups = (popupId) => {
                             const subPopups = popupWindowsInfo[popupId];
@@ -276,10 +276,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 });
                             }
                         };
-            
+
                         // Add all nested popups for each popup initially in popupsToRemove
                         Array.from(popupsToRemove).forEach(popupId => addNestedPopups(popupId));
-            
+
                         chrome.windows.getAll({ populate: true }, windows => {
                             windows.forEach(window => {
                                 if (popupsToRemove.has(window.id.toString())) {
@@ -449,12 +449,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
             return getZoomFactor().then(zoom => {
                 return Promise.all([
-                    saveConfig('lastClientX', request.lastClientX * zoom * window.devicePixelRatio),
-                    saveConfig('lastClientY', request.lastClientY * zoom * window.devicePixelRatio),
-                    saveConfig('lastScreenTop', request.top * zoom * window.devicePixelRatio),
-                    saveConfig('lastScreenLeft', request.left * zoom * window.devicePixelRatio),
-                    saveConfig('lastScreenWidth', request.width * zoom * window.devicePixelRatio),
-                    saveConfig('lastScreenHeight', request.height * zoom * window.devicePixelRatio)
+                    saveConfig('lastClientX', request.lastClientX * zoom),
+                    saveConfig('lastClientY', request.lastClientY * zoom),
+                    saveConfig('lastScreenTop', request.top * zoom),
+                    saveConfig('lastScreenLeft', request.left * zoom),
+                    saveConfig('lastScreenWidth', request.width * zoom),
+                    saveConfig('lastScreenHeight', request.height * zoom)
                 ]);
             }).then(() => {
                 return loadUserConfigs().then(userConfigs => {
@@ -559,6 +559,7 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
         } else {
             savedPositionAndSize = false;
         }
+
         chrome.windows.create({
             url: linkUrl,
             type: windowType,
@@ -574,6 +575,12 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
                 console.error('Error creating popup window:', chrome.runtime.lastError.message, chrome.runtime.lastError);
                 reject(chrome.runtime.lastError);
             } else {
+                if (window.devicePixelRatio != 1) {
+                    chrome.windows.update(newWindow.id, {
+                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top : top),
+                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left : left)
+                    })
+                }
                 updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, result.rememberPopupSizeAndPositionForDomain, resolve, reject);
             }
         });
@@ -588,8 +595,8 @@ function defaultPopupCreation(trigger, linkUrl, tab, currentWindow, defaultWidth
     let dx, dy;
 
 
-    const screenWidth = lastScreenWidth || screen.width;
-    const screenHeight = lastScreenHeight || screen.height;
+    const screenWidth = lastScreenWidth || screen.width * window.devicePixelRatio;
+    const screenHeight = lastScreenHeight || screen.height * window.devicePixelRatio;
 
     const centerX = (screenWidth - defaultWidth) / 2;
     const centerY = (screenHeight - defaultHeight) / 2;
@@ -614,8 +621,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
     const domain = new URL(linkUrl).hostname;
     popupWindowsInfo[originWindowId][newWindow.id] = {
         windowType: newWindow.type,
-        top: newWindow.top,
-        left: newWindow.left,
+        top: newWindow.top * window.devicePixelRatio,
+        left: newWindow.left * window.devicePixelRatio,
         width: newWindow.width,
         height: newWindow.height,
         focused: newWindow.focused,
@@ -624,8 +631,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
 
     if (rememberPopupSizeAndPosition) {
         if (popupWindowsInfo.savedPositionAndSize) {
-            popupWindowsInfo.savedPositionAndSize.left = newWindow.left;
-            popupWindowsInfo.savedPositionAndSize.top = newWindow.top;
+            popupWindowsInfo.savedPositionAndSize.left = newWindow.left * window.devicePixelRatio;
+            popupWindowsInfo.savedPositionAndSize.top = newWindow.top * window.devicePixelRatio;
             popupWindowsInfo.savedPositionAndSize.width = newWindow.width;
             popupWindowsInfo.savedPositionAndSize.height = newWindow.height;
         }
@@ -646,8 +653,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
             // Store the position and size under the domain
             // Update or add the domain-specific position and size
             popupWindowsInfo.savedPositionAndSize[domain] = {
-                top: newWindow.top,
-                left: newWindow.left,
+                top: newWindow.top * window.devicePixelRatio,
+                left: newWindow.left * window.devicePixelRatio,
                 width: newWindow.width,
                 height: newWindow.height
             };
