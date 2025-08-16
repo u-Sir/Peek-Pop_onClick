@@ -40,7 +40,7 @@ const configs = {
 
 async function loadUserConfigs(keys = Object.keys(configs)) {
     return new Promise(resolve => {
-        chrome.storage.local.get(keys, storedConfigs => {
+        browser.storage.local.get(keys, storedConfigs => {
             const mergedConfigs = { ...configs, ...storedConfigs };
             Object.assign(configs, mergedConfigs);
             resolve(mergedConfigs);
@@ -53,7 +53,7 @@ async function handleKeyDown(e) {
     if (e.key === 'Escape') {
         try {
             if (closeByEsc) {
-                chrome.runtime.sendMessage({ action: 'closeCurrentTab' });
+                browser.runtime.sendMessage({ action: 'closeCurrentTab' });
             } else return;
         } catch (error) { }
     }
@@ -68,7 +68,7 @@ async function handleKeyUp(e) {
         const timeDifference = currentTime - lastKeyTime;
 
         if (key === lastKey && timeDifference < 300) {
-            chrome.runtime.sendMessage({ action: 'sendPageBack' });
+            browser.runtime.sendMessage({ action: 'sendPageBack' });
         } else {
             lastKeyTime = currentTime;
             lastKey = key;
@@ -114,12 +114,12 @@ function handleMouseDown(e) {
             theme = 'light';
         }
 
-        chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
     }
 
     try {
         if (closeWhenFocusedInitialWindow) {
-            chrome.runtime.sendMessage({ action: 'windowRegainedFocus' });
+            browser.runtime.sendMessage({ action: 'windowRegainedFocus' });
         }
         savePositionSize();
 
@@ -187,7 +187,7 @@ function handleDoubleClick(e) {
     } else {
         theme = 'light';
     }
-    chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 
 
     setTimeout(() => {
@@ -237,7 +237,7 @@ function handleEvent(e) {
             theme = 'light';
         }
 
-        chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 
     }
 
@@ -249,7 +249,7 @@ function handleEvent(e) {
         theme = 'light';
     }
 
-    chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 }
 
 function handlePreviewMode(e, linkUrl) {
@@ -274,7 +274,7 @@ function handlePreviewMode(e, linkUrl) {
             addClickMask();
         }
 
-        chrome.runtime.sendMessage({
+        browser.runtime.sendMessage({
             linkUrl: linkUrl,
             lastClientX: e.screenX,
             lastClientY: e.screenY,
@@ -395,15 +395,15 @@ async function checkUrlAndToggleListeners() {
     } else {
         theme = 'light';
     }
-    chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
 
 }
 
 function savePositionSize() {
-    chrome.runtime.sendMessage({ action: 'savePositionSize' });
+    browser.runtime.sendMessage({ action: 'savePositionSize' });
 }
 
-chrome.storage.onChanged.addListener(async (changes, namespace) => {
+browser.storage.onChanged.addListener(async (changes, namespace) => {
     if (namespace === 'local' && (
         changes.previewModeDisabledUrls ||
         changes.linkDisabledUrls ||
@@ -427,13 +427,13 @@ new MutationObserver(() => {
     const url = location.href;
     if (url !== lastUrl) {
         lastUrl = url;
-        chrome.storage.local.set({ lastUrl: url });
+        browser.storage.local.set({ lastUrl: url });
         checkUrlAndToggleListeners();
     }
 
 }).observe(document, { subtree: true, childList: true });
 
-chrome.storage.local.get('lastUrl', (data) => {
+browser.storage.local.get('lastUrl', (data) => {
     if (data.lastUrl) {
         lastUrl = data.lastUrl;
     }
@@ -458,9 +458,9 @@ window.addEventListener('focus', async () => {
             theme = 'light';
         }
 
-        chrome.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
         if (closeWhenFocusedInitialWindow) {
-            chrome.runtime.sendMessage({ action: 'windowRegainedFocus' });
+            browser.runtime.sendMessage({ action: 'windowRegainedFocus' });
         }
     } catch (error) {
         // console.error('Error loading user configs:', error);

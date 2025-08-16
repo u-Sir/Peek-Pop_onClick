@@ -20,7 +20,7 @@ const configs = {
 // Load user configurations from storage
 async function loadUserConfigs() {
     return new Promise(resolve => {
-        chrome.storage.local.get(Object.keys(configs), storedConfigs => {
+        browser.storage.local.get(Object.keys(configs), storedConfigs => {
             const mergedConfigs = { ...configs, ...storedConfigs };
             Object.assign(configs, mergedConfigs);
             resolve(mergedConfigs);
@@ -32,48 +32,34 @@ async function loadUserConfigs() {
 async function saveConfig(key, value) {
     configs[key] = value;
     return new Promise(resolve => {
-        chrome.storage.local.set({ [key]: value }, () => {
+        browser.storage.local.set({ [key]: value }, () => {
             resolve();
         });
     });
 }
 
+browser.runtime.onInstalled.addListener(async () => {
+    const storedConfigs = await browser.storage.local.get(Object.keys(configs));
+    const mergedConfigs = { ...configs, ...storedConfigs };
+    Object.assign(configs, mergedConfigs);
 
-
-// Initialize the extension
-chrome.runtime.onInstalled.addListener(() => {
-    loadUserConfigs().then(userConfigs => {
-        const setBrowserInfo = new Promise((resolve, reject) => {
-            try {
-                chrome.runtime.getBrowserInfo((browserInfo) => {
-                    if (browserInfo.name === 'Firefox') {
-                        userConfigs['isFirefox'] = true;
-                    } else {
-                        userConfigs['isFirefox'] = false;
-                    }
-                    resolve();
-                });
-            } catch (error) {
-                userConfigs['isFirefox'] = false;
-                resolve();
-            }
-        });
-
-        setBrowserInfo.then(() => {
-            const keysToSave = Object.keys(configs).filter(key => userConfigs[key] === undefined);
-            return Promise.all(keysToSave.map(key => saveConfig(key, configs[key])));
-        }).catch(error => console.error('Error during installation setup:', error));
-    });
+    // 自动把 storage 中缺失的 key 写回
+    const keysToSave = Object.keys(configs).filter(k => storedConfigs[k] === undefined);
+    if (keysToSave.length > 0) {
+        const defaultsToSave = {};
+        for (const key of keysToSave) defaultsToSave[key] = configs[key];
+        await browser.storage.local.set(defaultsToSave);
+    }
 });
 
 
 // Handle incoming messages
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
     new Promise((resolve, reject) => {
-        chrome.windows.getCurrent(window => {
-            if (chrome.runtime.lastError) {
-                console.error('Error getting current window:', chrome.runtime.lastError);
-                reject(chrome.runtime.lastError);
+        browser.windows.getCurrent(window => {
+            if (browser.runtime.lastError) {
+                console.error('Error getting current window:', browser.runtime.lastError);
+                reject(browser.runtime.lastError);
             } else {
                 resolve(window);
             }
@@ -106,7 +92,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
         }).then(popupWindowsInfo => {
             if (request.action === 'savePositionSize') {
-                chrome.storage.local.get('popupWindowsInfo', (result) => {
+                browser.storage.local.get('popupWindowsInfo', (result) => {
                     const popupWindowsInfo = result.popupWindowsInfo || {};
 
                     const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).some(windowId => {
@@ -182,10 +168,10 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                             }
                                         }
 
-                                        chrome.storage.local.set({ popupWindowsInfo }, () => {
+                                        browser.storage.local.set({ popupWindowsInfo }, () => {
 
                                             // addBoundsChangeListener(sender.tab.url, currentWindow.id, originWindowId);
-                                            chrome.windows.onRemoved.addListener(windowRemovedListener);
+                                            browser.windows.onRemoved.addListener(windowRemovedListener);
                                         });
                                     }
                                 }
@@ -202,7 +188,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             if (request.action === 'closeCurrentTab') {
-                chrome.storage.local.get(['popupWindowsInfo'], (result) => {
+                browser.storage.local.get(['popupWindowsInfo'], (result) => {
                     // filter out empty objects under popupWindowsInfo
                     const popupWindowsInfo = Object.keys(result.popupWindowsInfo).reduce((acc, key) => {
                         if (Object.keys(result.popupWindowsInfo[key]).length > 0) {
@@ -219,11 +205,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                 Object.keys(popupWindowsInfo[windowId]).length === 0;
                         });
                     if (!isCurrentWindowOriginal) {
-                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                             if (tabs.length > 0) {
                                 const currentTab = tabs[0];
-                                chrome.tabs.remove(currentTab.id, () => {
-                                    chrome.windows.getAll({ populate: false }, (windows) => {
+                                browser.tabs.remove(currentTab.id, () => {
+                                    browser.windows.getAll({ populate: false }, (windows) => {
                                         const existingWindowIds = windows.map(win => win.id); // List of all current window IDs
 
                                         function cleanPopupInfo(info) {
@@ -242,7 +228,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         const cleanedPopupWindowsInfo = cleanPopupInfo(result.popupWindowsInfo);
 
                                         // Set the cleaned popupWindowsInfo back to storage
-                                        chrome.storage.local.set({ popupWindowsInfo: cleanedPopupWindowsInfo });
+                                        browser.storage.local.set({ popupWindowsInfo: cleanedPopupWindowsInfo });
                                     });
                                 });
                             }
@@ -255,7 +241,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             if (request.action === 'windowRegainedFocus') {
-                chrome.storage.local.get(['popupWindowsInfo'], (result) => {
+                browser.storage.local.get(['popupWindowsInfo'], (result) => {
                     const popupWindowsInfo = result.popupWindowsInfo || {};
 
                     const isCurrentWindowOriginal = popupWindowsInfo.hasOwnProperty(currentWindow.id);
@@ -280,11 +266,11 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         // Add all nested popups for each popup initially in popupsToRemove
                         Array.from(popupsToRemove).forEach(popupId => addNestedPopups(popupId));
 
-                        chrome.windows.getAll({ populate: true }, windows => {
+                        browser.windows.getAll({ populate: true }, windows => {
                             windows.forEach(window => {
                                 if (popupsToRemove.has(window.id.toString())) {
-                                    chrome.windows.remove(window.id, () => {
-                                        if (chrome.runtime.lastError) {
+                                    browser.windows.remove(window.id, () => {
+                                        if (browser.runtime.lastError) {
                                             // Error handling for window removal
                                         } else {
                                             // Window removed successfully
@@ -299,8 +285,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             }
 
             if (request.action === 'updateIcon') {
-                chrome.storage.local.get(['previewModeEnable'], userConfigs => {
-                    chrome.windows.getCurrent({ populate: true }, (window) => {
+                browser.storage.local.get(['previewModeEnable'], userConfigs => {
+                    browser.windows.getCurrent({ populate: true }, (window) => {
                         if (request.theme === 'dark') {
                             if (userConfigs.previewModeEnable) {
                                 if (request.previewMode !== undefined && !request.previewMode) {
@@ -384,12 +370,12 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                             if (enableContainerIdentify && sender.tab.cookieStoreId && sender.tab.cookieStoreId !== 'firefox-default') {
                                 createData.cookieStoreId = sender.tab.cookieStoreId;
                             }
-                            chrome.tabs.create(createData, () => {
-                                chrome.windows.get(sender.tab.windowId, window => {
+                            browser.tabs.create(createData, () => {
+                                browser.windows.get(sender.tab.windowId, window => {
                                     if (window.id) {
-                                        chrome.windows.remove(sender.tab.windowId, () => {
-                                            if (chrome.runtime.lastError) {
-                                                // console.error("Error removing window: ", chrome.runtime.lastError.message);
+                                        browser.windows.remove(sender.tab.windowId, () => {
+                                            if (browser.runtime.lastError) {
+                                                // console.error("Error removing window: ", browser.runtime.lastError.message);
                                             } else {
                                                 // console.log("Window removed successfully.");
                                             }
@@ -416,24 +402,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
                     if (tabId) {
                         // If sender.tab.id is defined, use it to get the zoom factor
-                        chrome.tabs.getZoom(tabId, (zoom) => {
-                            if (chrome.runtime.lastError) {
-                                reject(chrome.runtime.lastError);
+                        browser.tabs.getZoom(tabId, (zoom) => {
+                            if (browser.runtime.lastError) {
+                                reject(browser.runtime.lastError);
                             } else {
                                 resolve(zoom);
                             }
                         });
                     } else {
                         // If sender.tab.id is undefined, query the active tab
-                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                            if (chrome.runtime.lastError) {
-                                return reject(chrome.runtime.lastError);
+                        browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (browser.runtime.lastError) {
+                                return reject(browser.runtime.lastError);
                             }
                             if (tabs.length > 0) {
                                 const currentTab = tabs[0];
-                                chrome.tabs.getZoom(currentTab.id, (zoom) => {
-                                    if (chrome.runtime.lastError) {
-                                        reject(chrome.runtime.lastError);
+                                browser.tabs.getZoom(currentTab.id, (zoom) => {
+                                    if (browser.runtime.lastError) {
+                                        reject(browser.runtime.lastError);
                                     } else {
                                         resolve(zoom);
                                     }
@@ -468,8 +454,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         // console.log(request.action)
                     }
                     if (request.linkUrl) {
-                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-                            if (chrome.runtime.lastError) {
+                        browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                            if (browser.runtime.lastError) {
                                 //
                             }
                             if (tabs.length > 0) {
@@ -520,7 +506,7 @@ function handleLinkInPopup(trigger, linkUrl, tab, currentWindow, rememberPopupSi
 
         return new Promise((resolve, reject) => {
             if (rememberPopupSizeAndPosition) {
-                chrome.storage.local.get(['popupWindowsInfo'], result => {
+                browser.storage.local.get(['popupWindowsInfo'], result => {
                     const popupWindowsInfo = result.popupWindowsInfo;
                     const savedPositionAndSize = popupWindowsInfo.savedPositionAndSize || {};
 
@@ -541,7 +527,7 @@ function handleLinkInPopup(trigger, linkUrl, tab, currentWindow, rememberPopupSi
 
 // Function to create a popup window
 function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, height, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, resolve, reject) {
-    chrome.storage.local.get(['enableContainerIdentify', 'rememberPopupSizeAndPositionForDomain'], (result) => {
+    browser.storage.local.get(['enableContainerIdentify', 'rememberPopupSizeAndPositionForDomain'], (result) => {
         const enableContainerIdentify = result.enableContainerIdentify !== undefined ? result.enableContainerIdentify : true;
         let savedPositionAndSize;
         const domain = new URL(linkUrl).hostname;
@@ -555,12 +541,20 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
                     height: popupWindowsInfo.savedPositionAndSize[domain].height,
 
                 };
+            } else {
+                savedPositionAndSize = {
+                    top: popupWindowsInfo.savedPositionAndSize.top,
+                    left: popupWindowsInfo.savedPositionAndSize.left,
+                    width: popupWindowsInfo.savedPositionAndSize.width,
+                    height: popupWindowsInfo.savedPositionAndSize.height,
+                };
+
             }
         } else {
             savedPositionAndSize = false;
         }
 
-        chrome.windows.create({
+        browser.windows.create({
             url: linkUrl,
             type: windowType,
             top: parseInt(savedPositionAndSize ? savedPositionAndSize.top : top),
@@ -571,14 +565,20 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
             incognito: tab && tab.incognito !== undefined ? tab.incognito : false,
             ...(enableContainerIdentify && tab.cookieStoreId && tab.cookieStoreId !== 'firefox-default' ? { cookieStoreId: tab.cookieStoreId } : {})
         }, (newWindow) => {
-            if (chrome.runtime.lastError) {
-                console.error('Error creating popup window:', chrome.runtime.lastError.message, chrome.runtime.lastError);
-                reject(chrome.runtime.lastError);
+            if (browser.runtime.lastError) {
+                console.error('Error creating popup window:', browser.runtime.lastError.message, browser.runtime.lastError);
+                reject(browser.runtime.lastError);
             } else {
+
                 if (window.devicePixelRatio != 1) {
-                    chrome.windows.update(newWindow.id, {
-                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top : top),
-                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left : left)
+
+                    browser.windows.update(newWindow.id, {
+                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top/window.devicePixelRatio : ((top*2+height)/window.devicePixelRatio - height)/2),
+                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left/window.devicePixelRatio : ((left*2+width)/window.devicePixelRatio - width)/2)
+                    },(updated)=>{
+
+                        updatePopupInfoAndListeners(linkUrl, updated, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, result.rememberPopupSizeAndPositionForDomain, resolve, reject);
+
                     })
                 }
                 updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, result.rememberPopupSizeAndPositionForDomain, resolve, reject);
@@ -663,9 +663,9 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
         }
     }
 
-    chrome.storage.local.set({ popupWindowsInfo }, () => {
+    browser.storage.local.set({ popupWindowsInfo }, () => {
         // addBoundsChangeListener(linkUrl, newWindow.id, originWindowId);
-        chrome.windows.onRemoved.addListener(windowRemovedListener);
+        browser.windows.onRemoved.addListener(windowRemovedListener);
         resolve();
     });
 }
@@ -683,7 +683,7 @@ function isValidUrl(url) {
 
 // Listener for popup window removal
 function windowRemovedListener(windowId) {
-    chrome.storage.local.get('popupWindowsInfo', (result) => {
+    browser.storage.local.get('popupWindowsInfo', (result) => {
         const popupWindowsInfo = result.popupWindowsInfo || {};
 
         for (const originWindowId in popupWindowsInfo) {
@@ -694,7 +694,7 @@ function windowRemovedListener(windowId) {
                     delete popupWindowsInfo[originWindowId];
                 }
 
-                chrome.storage.local.set({ popupWindowsInfo });
+                browser.storage.local.set({ popupWindowsInfo });
                 break;
             }
         }
