@@ -561,7 +561,6 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
             left: parseInt(savedPositionAndSize ? savedPositionAndSize.left : left),
             width: parseInt(savedPositionAndSize ? savedPositionAndSize.width : width),
             height: parseInt(savedPositionAndSize ? savedPositionAndSize.height : height),
-            focused: true,
             incognito: tab && tab.incognito !== undefined ? tab.incognito : false,
             ...(enableContainerIdentify && tab.cookieStoreId && tab.cookieStoreId !== 'firefox-default' ? { cookieStoreId: tab.cookieStoreId } : {})
         }, (newWindow) => {
