@@ -52,7 +52,12 @@
     },
     "browser_specific_settings": {
         "gecko": {
-            "id": "peek_pop_onClick@uxer"
+            "id": "peek_pop_onClick@uxer",
+            "data_collection_permissions": {
+                "required": [
+                    "none"
+                ]
+            }
         }
     }
 }
