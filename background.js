@@ -187,8 +187,9 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                 sendResponse({ status: 'position and size saved' });
             }
 
+
             if (request.action === 'closeCurrentTab') {
-                browser.storage.local.get(['popupWindowsInfo'], (result) => {
+                chrome.storage.local.get(['popupWindowsInfo'], (result) => {
                     // filter out empty objects under popupWindowsInfo
                     const popupWindowsInfo = Object.keys(result.popupWindowsInfo).reduce((acc, key) => {
                         if (Object.keys(result.popupWindowsInfo[key]).length > 0) {
@@ -196,20 +197,35 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                         }
                         return acc;
                     }, {});
-                    const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).length === 0 ||
-                        (Object.keys(popupWindowsInfo).length === 1 && 'savedPositionAndSize' in popupWindowsInfo) ||
-                        Object.keys(popupWindowsInfo).some(windowId => {
-                            // Check if windowId exists and popupWindowsInfo[windowId] is empty (no popups)
+
+                    const isCurrentWindowOriginal = Object.keys(popupWindowsInfo).length === 0 // no records
+                        || (Object.keys(popupWindowsInfo).length === 1 && 'savedPositionAndSize' in popupWindowsInfo) // savedPositionAndSize only
+                        || (() => { // not under any other IDs
+                            const existsUnderOtherIds = (info, targetId, excludeTopLevel = true) =>
+                                Object.entries(info).some(([key, value]) => {
+                                    if (key === 'savedPositionAndSize') return false;
+                                    if (excludeTopLevel && parseInt(key, 10) === targetId) return false;
+                                    if (parseInt(key, 10) === targetId) return true;
+                                    return value && typeof value === 'object' && existsUnderOtherIds(value, targetId, false);
+                                });
+
+                            // Check if currentWindow.id exists under any other IDs
+                            if (existsUnderOtherIds(popupWindowsInfo, currentWindow.id)) return false;
+
+                            return true;
+                        })()
+                        || Object.keys(popupWindowsInfo).some(windowId => { // under currentWindow.id but empty
                             return windowId &&
                                 parseInt(windowId) === currentWindow.id &&
                                 Object.keys(popupWindowsInfo[windowId]).length === 0;
                         });
+
                     if (!isCurrentWindowOriginal) {
-                        browser.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+                        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
                             if (tabs.length > 0) {
                                 const currentTab = tabs[0];
-                                browser.tabs.remove(currentTab.id, () => {
-                                    browser.windows.getAll({ populate: false }, (windows) => {
+                                chrome.tabs.remove(currentTab.id, () => {
+                                    chrome.windows.getAll({ populate: false }, (windows) => {
                                         const existingWindowIds = windows.map(win => win.id); // List of all current window IDs
 
                                         function cleanPopupInfo(info) {
@@ -228,8 +244,12 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         const cleanedPopupWindowsInfo = cleanPopupInfo(result.popupWindowsInfo);
 
                                         // Set the cleaned popupWindowsInfo back to storage
-                                        browser.storage.local.set({ popupWindowsInfo: cleanedPopupWindowsInfo });
+                                        chrome.storage.local.set({ popupWindowsInfo: cleanedPopupWindowsInfo });
                                     });
+
+
+
+
                                 });
                             }
                         });
@@ -572,9 +592,9 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
                 if (window.devicePixelRatio != 1) {
 
                     browser.windows.update(newWindow.id, {
-                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top/window.devicePixelRatio : ((top*2+height)/window.devicePixelRatio - height)/2),
-                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left/window.devicePixelRatio : ((left*2+width)/window.devicePixelRatio - width)/2)
-                    },(updated)=>{
+                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top / window.devicePixelRatio : ((top * 2 + height) / window.devicePixelRatio - height) / 2),
+                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left / window.devicePixelRatio : ((left * 2 + width) / window.devicePixelRatio - width) / 2)
+                    }, (updated) => {
 
                         updatePopupInfoAndListeners(linkUrl, updated, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, result.rememberPopupSizeAndPositionForDomain, resolve, reject);
 
