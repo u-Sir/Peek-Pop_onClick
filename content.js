@@ -107,14 +107,7 @@ function handleMouseDown(e) {
         const events = ["click", "mouseup"];
         events.forEach(event => window.addEventListener(event, handleEvent, true));
 
-        // In popup.js or content.js
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            theme = 'dark';
-        } else {
-            theme = 'light';
-        }
-
-        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+        updateIcon();
     }
 
     try {
@@ -131,6 +124,15 @@ function handleMouseDown(e) {
     hasPopupTriggered = false;
 }
 
+function updateIcon() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        theme = 'dark';
+    } else {
+        theme = 'light';
+    }
+
+    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+}
 
 function handleDoubleClick(e) {
     isDoubleClick = true;
@@ -182,13 +184,7 @@ function handleDoubleClick(e) {
     document.removeEventListener('dblclick', handleDoubleClick, true);
 
 
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        theme = 'dark';
-    } else {
-        theme = 'light';
-    }
-    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
-
+    updateIcon();
 
     setTimeout(() => {
         isDoubleClick = false;
@@ -230,26 +226,10 @@ function handleEvent(e) {
             }, 250);
         }
 
-        // In popup.js or content.js
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            theme = 'dark';
-        } else {
-            theme = 'light';
-        }
-
-        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
-
+        updateIcon();
     }
 
-
-    // In popup.js or content.js
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        theme = 'dark';
-    } else {
-        theme = 'light';
-    }
-
-    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+    updateIcon();
 }
 
 function handlePreviewMode(e, linkUrl) {
@@ -390,12 +370,7 @@ async function checkUrlAndToggleListeners() {
     }
 
 
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        theme = 'dark';
-    } else {
-        theme = 'light';
-    }
-    browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+    updateIcon();
 
 }
 
@@ -482,14 +457,8 @@ window.addEventListener('focus', async () => {
 
 
         }
-        // In popup.js or content.js
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            theme = 'dark';
-        } else {
-            theme = 'light';
-        }
 
-        browser.runtime.sendMessage({ action: 'updateIcon', previewMode: previewMode, theme: theme });
+        updateIcon();
         if (closeWhenFocusedInitialWindow) {
             browser.runtime.sendMessage({ action: 'windowRegainedFocus' });
         }
