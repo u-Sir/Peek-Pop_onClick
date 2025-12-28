@@ -224,7 +224,7 @@ function handleEvent(e) {
         if (previewMode && e.isTrusted && linkUrl && !isDoubleClick) {
             e.preventDefault();
             e.stopPropagation();
-
+            isMouseDown = true;
             clickTimeout = setTimeout(() => {
                 handlePreviewMode(e, linkUrl);
             }, 250);
@@ -432,7 +432,7 @@ new MutationObserver(() => {
     }
 
 
-    
+
     (function replaceBingRedirectLinks() {
         if (!location.href.startsWith('https://www.bing.com/search?q=')) return;
 
@@ -469,11 +469,19 @@ window.addEventListener('focus', async () => {
     document.addEventListener('keydown', handleKeyDown);
     document.addEventListener('keyup', handleKeyUp);
 
+    isMouseDown = false;
+    hasPopupTriggered = false;
     if (window.self !== window.top) {
         window.parent.postMessage({ action: 'removeParentBlur' }, '*');
     }
 
     try {
+        if (previewMode && previewModeEnable && clickModifiedKey !== 'None') {
+
+            previewMode = false;
+
+
+        }
         // In popup.js or content.js
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             theme = 'dark';
@@ -578,7 +586,7 @@ function removeClickMask() {
 
 // Function to add the blur overlay
 function addBlurOverlay(blurPx, blurTime) {
-    if (!blurOverlay) { 
+    if (!blurOverlay) {
         blurOverlay = document.createElement('div');
         blurOverlay.style.position = 'fixed';
         blurOverlay.style.top = '0';
