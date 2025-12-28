@@ -119,8 +119,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                         }
                                         popupWindowsInfo[originWindowId][currentWindow.id] = {
                                             windowType: currentWindow.type,
-                                            top: currentWindow.top * window.devicePixelRatio,
-                                            left: currentWindow.left * window.devicePixelRatio,
+                                            top: currentWindow.top,
+                                            left: currentWindow.left,
                                             width: currentWindow.width,
                                             height: currentWindow.height,
                                             originDomain: domain
@@ -137,15 +137,15 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 
                                                 if (popupWindowsInfo.savedPositionAndSize) {
-                                                    popupWindowsInfo.savedPositionAndSize.left = currentWindow.left * window.devicePixelRatio;
-                                                    popupWindowsInfo.savedPositionAndSize.top = currentWindow.top * window.devicePixelRatio;
+                                                    popupWindowsInfo.savedPositionAndSize.left = currentWindow.left;
+                                                    popupWindowsInfo.savedPositionAndSize.top = currentWindow.top;
                                                     popupWindowsInfo.savedPositionAndSize.width = currentWindow.width;
                                                     popupWindowsInfo.savedPositionAndSize.height = currentWindow.height;
 
                                                 } else {
                                                     popupWindowsInfo.savedPositionAndSize = {
-                                                        top: currentWindow.top * window.devicePixelRatio,
-                                                        left: currentWindow.left * window.devicePixelRatio,
+                                                        top: currentWindow.top,
+                                                        left: currentWindow.left,
                                                         width: currentWindow.width,
                                                         height: currentWindow.height
                                                     };
@@ -158,8 +158,8 @@ browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
                                                 // Store the position and size under the domain
                                                 // Update or add the domain-specific position and size
                                                 popupWindowsInfo.savedPositionAndSize[domain] = {
-                                                    top: currentWindow.top * window.devicePixelRatio,
-                                                    left: currentWindow.left * window.devicePixelRatio,
+                                                    top: currentWindow.top,
+                                                    left: currentWindow.left,
                                                     width: currentWindow.width,
                                                     height: currentWindow.height
                                                 };
@@ -592,8 +592,8 @@ function createPopupWindow(trigger, linkUrl, tab, windowType, left, top, width, 
                 if (window.devicePixelRatio != 1) {
 
                     browser.windows.update(newWindow.id, {
-                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top / window.devicePixelRatio : ((top * 2 + height) / window.devicePixelRatio - height) / 2),
-                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left / window.devicePixelRatio : ((left * 2 + width) / window.devicePixelRatio - width) / 2)
+                        top: parseInt(savedPositionAndSize ? savedPositionAndSize.top : top),
+                        left: parseInt(savedPositionAndSize ? savedPositionAndSize.left : left)
                     }, (updated) => {
 
                         updatePopupInfoAndListeners(linkUrl, updated, originWindowId, popupWindowsInfo, rememberPopupSizeAndPosition, result.rememberPopupSizeAndPositionForDomain, resolve, reject);
@@ -614,8 +614,8 @@ function defaultPopupCreation(trigger, linkUrl, tab, currentWindow, defaultWidth
     let dx, dy;
 
 
-    const screenWidth = lastScreenWidth || screen.width * window.devicePixelRatio;
-    const screenHeight = lastScreenHeight || screen.height * window.devicePixelRatio;
+    const screenWidth = lastScreenWidth || screen.width;
+    const screenHeight = lastScreenHeight || screen.height;
 
     const centerX = (screenWidth - defaultWidth) / 2;
     const centerY = (screenHeight - defaultHeight) / 2;
@@ -640,8 +640,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
     const domain = new URL(linkUrl).hostname;
     popupWindowsInfo[originWindowId][newWindow.id] = {
         windowType: newWindow.type,
-        top: newWindow.top * window.devicePixelRatio,
-        left: newWindow.left * window.devicePixelRatio,
+        top: newWindow.top,
+        left: newWindow.left,
         width: newWindow.width,
         height: newWindow.height,
         focused: newWindow.focused,
@@ -650,8 +650,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
 
     if (rememberPopupSizeAndPosition) {
         if (popupWindowsInfo.savedPositionAndSize) {
-            popupWindowsInfo.savedPositionAndSize.left = newWindow.left * window.devicePixelRatio;
-            popupWindowsInfo.savedPositionAndSize.top = newWindow.top * window.devicePixelRatio;
+            popupWindowsInfo.savedPositionAndSize.left = newWindow.left;
+            popupWindowsInfo.savedPositionAndSize.top = newWindow.top;
             popupWindowsInfo.savedPositionAndSize.width = newWindow.width;
             popupWindowsInfo.savedPositionAndSize.height = newWindow.height;
         }
@@ -672,8 +672,8 @@ function updatePopupInfoAndListeners(linkUrl, newWindow, originWindowId, popupWi
             // Store the position and size under the domain
             // Update or add the domain-specific position and size
             popupWindowsInfo.savedPositionAndSize[domain] = {
-                top: newWindow.top * window.devicePixelRatio,
-                left: newWindow.left * window.devicePixelRatio,
+                top: newWindow.top,
+                left: newWindow.left,
                 width: newWindow.width,
                 height: newWindow.height
             };
