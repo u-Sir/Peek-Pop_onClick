@@ -179,12 +179,6 @@ function loadUserConfigs(callback) {
     });
 }
 
-function saveConfig(key, value) {
-    configs[key] = value;
-    let data = {};
-    data[key] = value;
-    chrome.storage.local.set(data);
-}
 
 function saveAllSettings() {
     chrome.storage.local.set(configs);
