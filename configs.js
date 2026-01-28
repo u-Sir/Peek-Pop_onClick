@@ -1,0 +1,18 @@
+export const configs = {
+    'closeWhenFocusedInitialWindow': true,
+    'blurEnable': true,
+    'blurPx': 3,
+    'blurTime': 1,
+    'rememberPopupSizeAndPosition': true,
+    'popupWindowsInfo': {},
+    'closeByEsc': true,
+    'doubleTapKeyToSendPageBack': 'Ctrl',
+    'previewModeDisabledUrls': [],
+    'previewModeWindowType': 'popup',
+    'previewModeEnable': true,
+    'doubleClickAsClick': true,
+    'rememberPopupSizeAndPositionForDomain': true,
+    'isFirefox': false,
+    'linkDisabledUrls': [],
+    'enableContainerIdentify': true,
+};
